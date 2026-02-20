@@ -1,187 +1,182 @@
-// الإعدادات الأولية
-let currentCategory = 'صدر + تراي';
-const sounds = {
-    sync: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'),
-    timer: new Audio('https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3')
-};
+let currentCategory = 'صدر';
+let myChart = null;
 
-// تشغيل الخلفية
-VANTA.DOTS({
-    el: "#vanta-canvas",
-    mouseControls: true,
-    color: 0xff003c,
-    backgroundColor: 0x050505,
-    size: 2.00,
-    spacing: 35.00
-});
+// تهيئة الأيقونات
+lucide.createIcons();
 
-// تبديل الأقسام
+// 1. نظام إدارة البيانات
+function getLogs() { return JSON.parse(localStorage.getItem('neoBeastV4')) || []; }
+function saveLogs(logs) { localStorage.setItem('neoBeastV4', JSON.stringify(logs)); }
+
+// 2. تغيير القسم العضلي
 function setCategory(cat) {
     currentCategory = cat;
-    document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    document.getElementById('categoryDisplay').innerText = cat;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.innerText === cat));
+    document.getElementById('currentCatDisplay').innerText = cat;
     refreshUI();
 }
 
-// القائمة الذكية والاقتراحات
-function showQuickList() {
-    const input = document.getElementById('exerciseName').value.toLowerCase();
-    const list = document.getElementById('quickExerciseList');
-    const logs = JSON.parse(localStorage.getItem('neoBeastLogs')) || [];
+// 3. محرك التنبؤ والتحليل اللحظي
+document.getElementById('weight').addEventListener('input', () => {
+    const w = parseFloat(document.getElementById('weight').value);
+    const n = document.getElementById('exerciseName').value;
+    const pred = document.getElementById('predictionText');
     
-    const names = [...new Set(logs.filter(l => l.category === currentCategory).map(l => l.name))];
-    const filtered = names.filter(n => n.toLowerCase().includes(input));
-
-    if (filtered.length > 0) {
-        list.innerHTML = filtered.map(n => `<div class="quick-item" onclick="selectExercise('${n}')">${n}</div>`).join('');
-        list.classList.remove('hidden');
-    } else {
-        list.classList.add('hidden');
+    const logs = getLogs();
+    const last = logs.find(l => l.name === n);
+    
+    if (last && w > 0) {
+        const prob = Math.min(100, (last.max / (w * 1.2)) * 100).toFixed(0);
+        pred.innerText = `احتمالية النجاح: ${prob}% | الهدف المقترح: ${last.reps + 1} عدات`;
+        pred.className = prob > 70 ? "text-green-400 text-xs" : "text-orange-400 text-xs";
     }
-}
+});
 
-function selectExercise(name) {
-    document.getElementById('exerciseName').value = name;
-    document.getElementById('quickExerciseList').classList.add('hidden');
-    
-    const logs = JSON.parse(localStorage.getItem('neoBeastLogs')) || [];
-    const last = logs.find(l => l.name === name);
-    
-    if (last) {
-        const aiWeight = (parseFloat(last.weight) * 1.025).toFixed(1);
-        document.getElementById('aiSuggestion').innerText = `AI TARGET: ${aiWeight}KG`;
-        document.getElementById('weight').placeholder = last.weight;
-        document.getElementById('reps').value = last.reps;
-    }
-}
-
-// إضافة تمرين
+// 4. إضافة تمرين جديد
 function addEntry() {
     const name = document.getElementById('exerciseName').value;
     const weight = parseFloat(document.getElementById('weight').value);
     const reps = parseInt(document.getElementById('reps').value);
+    const rpe = document.getElementById('rpeRange').value;
 
     if (!name || isNaN(weight)) return;
 
-    const logs = JSON.parse(localStorage.getItem('neoBeastLogs')) || [];
-    const prev = logs.find(l => l.name === name);
-
+    const logs = getLogs();
     const entry = {
         id: Date.now(),
-        name, weight, reps,
+        name, weight, reps, rpe,
         category: currentCategory,
-        max: (weight * (1 + reps / 30)).toFixed(1),
-        diff: prev ? (weight - prev.weight).toFixed(1) : 0,
-        date: new Date().toLocaleDateString('en-GB')
+        max: (weight * (1 + reps/30)).toFixed(1),
+        date: new Date().toLocaleDateString('en-GB'),
+        timestamp: Date.now()
     };
 
     logs.unshift(entry);
-    localStorage.setItem('neoBeastLogs', JSON.stringify(logs));
-    
-    sounds.sync.play();
-    startRestTimer(60);
+    saveLogs(logs);
+    startRestTimer();
     refreshUI();
-    clearInputs();
-}
-
-// مؤقت الاستراحة
-function startRestTimer(sec) {
-    const el = document.getElementById('restTimer');
-    const display = document.getElementById('timerDisplay');
-    el.style.display = 'flex';
-    let time = sec;
     
-    const interval = setInterval(() => {
-        time--;
-        display.innerText = `${time}s`;
-        if (time <= 0) {
-            clearInterval(interval);
-            sounds.timer.play();
-            el.style.display = 'none';
-        }
-    }, 1000);
+    // Clear inputs
+    document.getElementById('weight').value = '';
+    document.getElementById('reps').value = '';
 }
 
+// 5. تحديث الواجهة الكامل (The Core)
 function refreshUI() {
-    const allLogs = JSON.parse(localStorage.getItem('neoBeastLogs')) || [];
-    const logs = allLogs.filter(l => l.category === currentCategory);
-    const container = document.getElementById('logsContainer');
-
-    // ليفل الوحش
-    const level = Math.floor(allLogs.length / 5) + 1;
-    document.getElementById('levelCircle').innerText = level;
-    document.getElementById('xpBar').style.width = `${(allLogs.length % 5) * 20}%`;
-
-    // الإنجازات
-    if (allLogs.length > 0) document.getElementById('badge-1').classList.add('achievement-active');
-    if (allLogs.length > 20) document.getElementById('badge-2').classList.add('achievement-active');
-
-    container.innerHTML = logs.map(log => `
-        <div class="glass-panel p-5 rounded-2xl flex justify-between items-center border-l-2 ${log.diff > 0 ? 'border-green-500' : 'border-white/10'}">
-            <div>
-                <h4 class="font-bold text-white italic">${log.name}</h4>
-                <p class="text-[9px] font-cyber text-gray-500 uppercase mt-1">
-                    ${log.date} | ${log.diff > 0 ? '↑ +'+log.diff : '• STABLE'}
-                </p>
-            </div>
-            <div class="flex items-center gap-6">
-                <div class="text-right">
-                    <p class="text-[--neon-red] font-cyber font-black text-xl">${log.weight}</p>
-                    <p class="text-[8px] text-gray-600 uppercase font-bold">${log.reps} Reps</p>
-                </div>
-                <button onclick="deleteEntry(${log.id})" class="text-gray-800 hover:text-red-500 transition-colors">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
-            </div>
-        </div>
-    `).join('');
+    const allLogs = getLogs();
+    const filteredLogs = allLogs.filter(l => l.category === currentCategory);
     
+    updateHologram(allLogs);
+    updatePRRoom(allLogs);
+    updateStats(allLogs);
+    renderLogs(filteredLogs);
+    renderChart(filteredLogs);
     lucide.createIcons();
-    updateChart(logs);
 }
 
-function updateChart(data) {
-    const ctx = document.getElementById('beastChart').getContext('2d');
-    const points = [...data].reverse().slice(-10);
-    
-    if (window.chartObj) window.chartObj.destroy();
-    
-    window.chartObj = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: points.map(p => p.date),
-            datasets: [{
-                label: '1RM Evolution',
-                data: points.map(p => p.max),
-                borderColor: '#00f3ff',
-                borderWidth: 2,
-                pointRadius: 0,
-                tension: 0.4,
-                fill: true,
-                backgroundColor: 'rgba(0, 243, 255, 0.05)'
-            }]
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { x: { display: false }, y: { grid: { display: false }, ticks: { color: '#333' } } }
+// 6. تحديث المجسم الهولوغرامي (واقعي)
+function updateHologram(all) {
+    const cats = ['صدر', 'ظهر', 'باي', 'تراي', 'أرجل'];
+    const now = Date.now();
+
+    cats.forEach(cat => {
+        const el = document.getElementById(`bio-${cat}`);
+        if (!el) return;
+
+        const muscleLogs = all.filter(l => l.category === cat);
+        el.classList.remove('recovering', 'evolved');
+
+        if (muscleLogs.length > 0) {
+            const last = muscleLogs[0];
+            const hours = (now - last.timestamp) / (3600000);
+
+            if (hours < 48) {
+                el.classList.add('recovering');
+            } else if (Math.max(...muscleLogs.map(l => l.weight)) > 80) {
+                el.classList.add('evolved');
+            }
         }
     });
 }
 
-function deleteEntry(id) {
-    let logs = JSON.parse(localStorage.getItem('neoBeastLogs'));
-    logs = logs.filter(l => l.id !== id);
-    localStorage.setItem('neoBeastLogs', JSON.stringify(logs));
-    refreshUI();
+// 7. غرفة الـ PR
+function updatePRRoom(all) {
+    const cats = ['صدر', 'ظهر', 'أكتاف', 'تراي', 'باي', 'أرجل'];
+    const grid = document.getElementById('prGrid');
+    
+    grid.innerHTML = cats.map(c => {
+        const cLogs = all.filter(l => l.category === c);
+        const max = cLogs.length ? Math.max(...cLogs.map(l => l.weight)) : 0;
+        return `
+            <div class="pr-card">
+                <p class="text-[7px] font-cyber text-gray-500 uppercase">${c}</p>
+                <p class="text-xs font-black text-white">${max}KG</p>
+            </div>
+        `;
+    }).join('');
 }
 
-function clearInputs() {
-    document.getElementById('exerciseName').value = '';
-    document.getElementById('weight').value = '';
-    document.getElementById('aiSuggestion').innerText = '';
+// 8. مؤقت الراحة
+function startRestTimer() {
+    const timer = document.getElementById('restTimer');
+    let timeLeft = 60;
+    timer.classList.remove('hidden');
+    
+    const interval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timerSeconds').innerText = timeLeft + 's';
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            timer.classList.add('hidden');
+        }
+    }, 1000);
 }
 
+// 9. الرسم البياني
+function renderChart(data) {
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    const chartData = [...data].reverse().slice(-10);
+    
+    if (myChart) myChart.destroy();
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.map(d => d.date),
+            datasets: [{
+                label: 'القوة التقديرية (1RM)',
+                data: chartData.map(d => d.max),
+                borderColor: '#00f3ff',
+                backgroundColor: 'rgba(0,243,255,0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#444', font: { size: 8 } } } } }
+    });
+}
+
+// 10. عرض السجلات
+function renderLogs(logs) {
+    const container = document.getElementById('logsContainer');
+    container.innerHTML = logs.map(l => `
+        <div class="glass-panel p-5 rounded-2xl flex justify-between items-center border-r-4 border-[--neon-red]">
+            <div>
+                <h4 class="font-bold text-sm">${l.name}</h4>
+                <p class="text-[8px] font-cyber text-gray-500 uppercase">RPE: ${l.rpe} | ${l.date}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xl font-black font-cyber text-[--cyber-blue]">${l.weight}KG</p>
+                <p class="text-[9px] text-gray-400">${l.reps} REPS</p>
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateStats(all) {
+    const totalVol = all.reduce((acc, curr) => acc + (curr.weight * curr.reps), 0);
+    document.getElementById('levelDisplay').innerText = Math.floor(totalVol / 1000) + 1;
+    document.getElementById('userRank').innerText = totalVol > 50000 ? "TITAN PROTOCOL ACTIVE" : "NORMALIZING BIOMETRICS...";
+}
+
+// تشغيل عند التحميل
 window.onload = refreshUI;
