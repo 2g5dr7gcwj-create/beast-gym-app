@@ -1,64 +1,118 @@
 :root {
     --neon-red: #ff003c;
     --cyber-blue: #00f3ff;
-    --glass: rgba(20, 20, 20, 0.75);
+    --bg-dark: #050505;
 }
 
 body {
-    background-color: #050505;
-    color: #e0e0e0;
+    background-color: var(--bg-dark);
+    color: #fff;
     font-family: 'Cairo', sans-serif;
     margin: 0;
+    overflow-x: hidden;
 }
 
 .font-cyber { font-family: 'Orbitron', sans-serif; }
 
+/* تأثير الزجاج */
 .glass-panel {
-    background: var(--glass);
+    background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* المدخلات الذكية */
 .cyber-input {
     width: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1rem;
-    border-radius: 12px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 1.2rem;
+    border-radius: 15px;
     color: white;
-    transition: 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     outline: none;
 }
 
 .cyber-input:focus {
-    border-color: var(--neon-red);
-    box-shadow: 0 0 15px rgba(255, 0, 60, 0.2);
+    border-color: var(--cyber-blue);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+/* الأزرار */
+.cat-btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid transparent;
+    color: #666;
+    font-size: 0.75rem;
+    font-weight: 800;
+    white-space: nowrap;
+    transition: 0.3s;
+}
+
+.cat-btn.active {
+    background: var(--neon-red);
+    color: white;
+    box-shadow: 0 0 20px rgba(255, 0, 60, 0.3);
 }
 
 .beast-btn {
     width: 100%;
+    padding: 1.2rem;
     background: var(--neon-red);
-    color: white;
-    padding: 1.25rem;
-    border-radius: 15px;
+    border-radius: 18px;
     font-weight: 900;
-    font-size: 1.2rem;
-    text-transform: uppercase;
+    font-family: 'Orbitron';
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
     transition: 0.3s;
-    box-shadow: 0 0 20px rgba(255, 0, 60, 0.4);
 }
 
-.beast-btn:hover {
-    transform: translateY(-3px);
-    filter: brightness(1.2);
-}
-
-#vanta-canvas {
+/* مؤقت الاستراحة */
+.rest-timer-overlay {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -1;
+    bottom: 30px;
+    right: 30px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.8);
+    border: 2px solid var(--cyber-blue);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    box-shadow: 0 0 30px rgba(0, 243, 255, 0.4);
 }
 
-.custom-scroll::-webkit-scrollbar { width: 4px; }
-.custom-scroll::-webkit-scrollbar-thumb { background: var(--neon-red); border-radius: 10px; }
+/* قائمة التمارين السريعة */
+.quick-item {
+    padding: 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: 0.2s;
+}
+
+.quick-item:hover {
+    background: rgba(0, 243, 255, 0.1);
+    padding-right: 2rem;
+}
+
+.achievement-badge {
+    width: 2rem;
+    height: 2rem;
+    color: #222;
+    transition: 0.5s;
+}
+
+.achievement-active {
+    color: var(--cyber-blue);
+    filter: drop-shadow(0 0 5px var(--cyber-blue));
+}
+
+.custom-scroll::-webkit-scrollbar { width: 3px; }
+.custom-scroll::-webkit-scrollbar-thumb { background: var(--neon-red); }
