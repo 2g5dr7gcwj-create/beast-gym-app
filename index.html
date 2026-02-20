@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>NEO-BEAST | Pro Tracker</title>
-    
+    <title>NEO-BEAST | Pro OS</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,24 +13,29 @@
     <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.dots.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Cairo:wght@300;600;900&display=swap" rel="stylesheet">
 </head>
-<body class="antialiased">
+<body>
     <div id="vanta-canvas"></div>
 
-    <main class="max-w-4xl mx-auto p-4 md:p-10 relative">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+    <div id="restTimer" class="rest-timer-overlay font-cyber">
+        <div class="timer-ring"></div>
+        <span id="timerDisplay">60s</span>
+    </div>
+
+    <main class="max-w-5xl mx-auto p-4 md:p-10 relative">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
             <div class="text-right">
-                <h1 class="text-5xl md:text-7xl font-black italic tracking-tighter text-white font-cyber">
-                    NEO<span class="text-[--neon-red]">BEAST</span>
-                </h1>
-                <p class="text-gray-400 tracking-widest text-[10px] mt-2 uppercase font-cyber">Core Protocol v4.0.2</p>
+                <h1 class="text-6xl font-black italic tracking-tighter text-white font-cyber">NEO<span class="text-[--neon-red]">BEAST</span></h1>
+                <p class="text-[--cyber-blue] font-cyber text-[9px] tracking-[0.3em] uppercase opacity-70">Tactical Training System v5.0</p>
             </div>
             
-            <div class="glass-panel p-4 rounded-2xl flex items-center gap-4 min-w-[200px]">
-                <div id="levelCircle" class="w-16 h-16 rounded-full border-4 border-[--neon-red] flex items-center justify-center font-cyber text-2xl font-bold">1</div>
-                <div>
-                    <p class="text-[--neon-red] text-[10px] font-bold uppercase font-cyber">Monster Level</p>
-                    <div class="w-32 h-2 bg-gray-800 rounded-full mt-1 overflow-hidden">
-                        <div id="xpBar" class="h-full bg-[--neon-red] transition-all duration-1000" style="width: 0%"></div>
+            <div class="flex gap-4">
+                <div class="glass-panel p-4 rounded-2xl flex items-center gap-4 border-r-4 border-[--neon-red]">
+                    <div id="levelCircle" class="w-14 h-14 rounded-full border-2 border-[--neon-red] flex items-center justify-center font-cyber text-xl font-bold">1</div>
+                    <div class="hidden sm:block">
+                        <p class="text-gray-500 text-[8px] uppercase font-cyber">Power Level</p>
+                        <div class="w-24 h-1.5 bg-gray-800 rounded-full mt-1 overflow-hidden">
+                            <div id="xpBar" class="h-full bg-[--neon-red] transition-all duration-1000"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -39,37 +43,66 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-5 space-y-6">
-                <section class="glass-panel p-6 rounded-[2rem] border-t-2 border-white/10">
-                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
-                        <i data-lucide="zap" class="text-yellow-400 fill-yellow-400"></i> تغذية البيانات
-                    </h2>
+                <section class="glass-panel p-6 rounded-[2rem] border-t-2 border-white/5 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[--neon-red] to-transparent opacity-30"></div>
+                    
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold flex items-center gap-2 text-white">
+                            <i data-lucide="crosshair" class="text-[--neon-red] w-5 h-5"></i> وحدة الإدخال
+                        </h2>
+                        <span id="aiSuggestion" class="text-[9px] font-cyber text-[--cyber-blue] animate-pulse"></span>
+                    </div>
+
+                    <div class="flex gap-2 mb-6 overflow-x-auto pb-2 custom-scroll">
+                        <button onclick="setCategory('صدر + تراي')" class="cat-btn active" id="btn-chest">صدر + تراي</button>
+                        <button onclick="setCategory('ظهر + باي')" class="cat-btn">ظهر + باي</button>
+                        <button onclick="setCategory('أرجل + أكتاف')" class="cat-btn">أرجل + أكتاف</button>
+                    </div>
+
                     <div class="space-y-4">
-                        <input type="text" id="exerciseName" placeholder="اسم التمرين" class="cyber-input">
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="number" id="weight" placeholder="الوزن (KG)" class="cyber-input font-cyber text-center">
-                            <input type="number" id="reps" placeholder="التكرار" class="cyber-input font-cyber text-center">
+                        <div class="relative">
+                            <input type="text" id="exerciseName" placeholder="ابحث أو اكتب تمرين جديد..." class="cyber-input" onfocus="showQuickList()" oninput="showQuickList()">
+                            <div id="quickExerciseList" class="absolute w-full mt-2 glass-panel rounded-xl hidden z-50 max-h-48 overflow-y-auto border border-white/10 shadow-2xl"></div>
                         </div>
-                        <button onclick="addEntry()" class="beast-btn">تـسـجـيـل الـقـوة</button>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="relative">
+                                <label class="absolute -top-2 right-3 px-2 bg-[#0a0a0a] text-[9px] text-gray-500 font-cyber">WEIGHT</label>
+                                <input type="number" id="weight" class="cyber-input font-cyber text-center text-xl">
+                            </div>
+                            <div class="relative">
+                                <label class="absolute -top-2 right-3 px-2 bg-[#0a0a0a] text-[9px] text-gray-500 font-cyber">REPS</label>
+                                <input type="number" id="reps" class="cyber-input font-cyber text-center text-xl">
+                            </div>
+                        </div>
+                        <button onclick="addEntry()" class="beast-btn group">
+                            <span class="relative z-10">مزامنة البيانات</span>
+                            <div class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform"></div>
+                        </button>
                     </div>
                 </section>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="glass-panel p-4 rounded-2xl text-center">
-                        <p class="text-gray-500 text-[10px] mb-1 uppercase">Total Volume</p>
-                        <span id="totalVolume" class="text-2xl font-cyber font-bold text-white">0</span>
-                    </div>
-                    <div class="glass-panel p-4 rounded-2xl text-center">
-                        <p class="text-gray-500 text-[10px] mb-1 uppercase">Top Max 1RM</p>
-                        <span id="topMax" class="text-2xl font-cyber font-bold text-[--cyber-blue]">0</span>
-                    </div>
+                <div class="glass-panel p-4 rounded-2xl flex justify-around items-center">
+                    <i data-lucide="zap" id="badge-1" class="achievement-badge"></i>
+                    <i data-lucide="shield" id="badge-2" class="achievement-badge"></i>
+                    <i data-lucide="target" id="badge-3" class="achievement-badge"></i>
+                    <i data-lucide="award" id="badge-4" class="achievement-badge"></i>
                 </div>
             </div>
 
             <div class="lg:col-span-7 space-y-6">
-                <div class="glass-panel p-6 rounded-[2rem]">
-                    <canvas id="beastChart" height="220"></canvas>
+                <div class="glass-panel p-6 rounded-[2rem] h-[300px]">
+                    <canvas id="beastChart"></canvas>
                 </div>
-                <div id="logsContainer" class="space-y-4 max-h-[450px] overflow-y-auto custom-scroll"></div>
+
+                <div class="flex justify-between items-end px-2">
+                    <h3 id="categoryDisplay" class="text-2xl font-black italic text-white uppercase">صدر + تراي</h3>
+                    <div class="flex gap-2">
+                        <button onclick="exportData()" class="text-[8px] font-cyber border border-white/10 px-3 py-1 rounded-md opacity-50 hover:opacity-100">BACKUP</button>
+                        <button onclick="clearAll()" class="text-[8px] font-cyber border border-red-900/50 text-red-500 px-3 py-1 rounded-md">WIPE</button>
+                    </div>
+                </div>
+
+                <div id="logsContainer" class="space-y-4 max-h-[400px] overflow-y-auto custom-scroll pr-2"></div>
             </div>
         </div>
     </main>
