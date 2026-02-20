@@ -1,118 +1,32 @@
-:root {
-    --neon-red: #ff003c;
-    --cyber-blue: #00f3ff;
-    --bg-dark: #050505;
-}
-
-body {
-    background-color: var(--bg-dark);
-    color: #fff;
-    font-family: 'Cairo', sans-serif;
-    margin: 0;
-    overflow-x: hidden;
-}
-
+:root { --neon-red: #ff003c; --cyber-blue: #00f3ff; }
+* { box-sizing: border-box; font-family: 'Cairo', sans-serif; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 .font-cyber { font-family: 'Orbitron', sans-serif; }
+body { scroll-behavior: smooth; }
 
-/* تأثير الزجاج */
-.glass-panel {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+.glass-panel { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+.cyber-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); padding: 1rem; border-radius: 15px; color: white; width: 100%; outline: none; }
+.cyber-input:focus { border-color: var(--cyber-blue); box-shadow: 0 0 20px rgba(0,243,255,0.2); }
+
+.cat-btn { padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 10px; font-family: 'Orbitron'; font-weight: 900; background: rgba(255,255,255,0.05); color: #555; }
+.cat-btn.active { background: var(--neon-red); color: white; box-shadow: 0 0 20px rgba(255,0,60,0.3); }
+
+.beast-btn { background: var(--neon-red); padding: 1.2rem; border-radius: 18px; font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px; box-shadow: 0 10px 30px rgba(255,0,60,0.2); }
+.beast-btn:hover { transform: translateY(-3px); filter: brightness(1.2); }
+
+.muscle-unit { transition: fill 1.5s, filter 1s; cursor: help; }
+.recovering { fill: rgba(255, 170, 0, 0.4) !important; filter: drop-shadow(0 0 8px #ffaa00); }
+.evolved { fill: rgba(0, 243, 255, 0.4) !important; filter: drop-shadow(0 0 12px var(--cyber-blue)); stroke: white !important; }
+
+.scanner-grid {
+    background-image: linear-gradient(rgba(0,243,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,243,255,0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
 }
-
-/* المدخلات الذكية */
-.cyber-input {
-    width: 100%;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 1.2rem;
-    border-radius: 15px;
-    color: white;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    outline: none;
+.scanner-line {
+    position: fixed; top: 0; width: 100%; height: 2px; background: var(--cyber-blue); opacity: 0.2; animation: scan 6s linear infinite; z-index: 100;
 }
+@keyframes scan { 0% { top: 0; } 100% { top: 100vh; } }
+@keyframes scanMove { 0%, 100% { top: 10%; opacity: 0.1; } 50% { top: 90%; opacity: 0.4; } }
+#scanLine { animation: scanMove 4s ease-in-out infinite; }
 
-.cyber-input:focus {
-    border-color: var(--cyber-blue);
-    box-shadow: 0 0 20px rgba(0, 243, 255, 0.15);
-    transform: translateY(-2px);
-}
-
-/* الأزرار */
-.cat-btn {
-    padding: 0.6rem 1.2rem;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid transparent;
-    color: #666;
-    font-size: 0.75rem;
-    font-weight: 800;
-    white-space: nowrap;
-    transition: 0.3s;
-}
-
-.cat-btn.active {
-    background: var(--neon-red);
-    color: white;
-    box-shadow: 0 0 20px rgba(255, 0, 60, 0.3);
-}
-
-.beast-btn {
-    width: 100%;
-    padding: 1.2rem;
-    background: var(--neon-red);
-    border-radius: 18px;
-    font-weight: 900;
-    font-family: 'Orbitron';
-    letter-spacing: 2px;
-    position: relative;
-    overflow: hidden;
-    transition: 0.3s;
-}
-
-/* مؤقت الاستراحة */
-.rest-timer-overlay {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.8);
-    border: 2px solid var(--cyber-blue);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    box-shadow: 0 0 30px rgba(0, 243, 255, 0.4);
-}
-
-/* قائمة التمارين السريعة */
-.quick-item {
-    padding: 1rem;
-    cursor: pointer;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    transition: 0.2s;
-}
-
-.quick-item:hover {
-    background: rgba(0, 243, 255, 0.1);
-    padding-right: 2rem;
-}
-
-.achievement-badge {
-    width: 2rem;
-    height: 2rem;
-    color: #222;
-    transition: 0.5s;
-}
-
-.achievement-active {
-    color: var(--cyber-blue);
-    filter: drop-shadow(0 0 5px var(--cyber-blue));
-}
-
-.custom-scroll::-webkit-scrollbar { width: 3px; }
-.custom-scroll::-webkit-scrollbar-thumb { background: var(--neon-red); }
+.pr-card { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
