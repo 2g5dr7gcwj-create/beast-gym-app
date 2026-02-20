@@ -1,0 +1,64 @@
+:root {
+    --neon-red: #ff003c;
+    --cyber-blue: #00f3ff;
+    --glass: rgba(20, 20, 20, 0.75);
+}
+
+body {
+    background-color: #050505;
+    color: #e0e0e0;
+    font-family: 'Cairo', sans-serif;
+    margin: 0;
+}
+
+.font-cyber { font-family: 'Orbitron', sans-serif; }
+
+.glass-panel {
+    background: var(--glass);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cyber-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 12px;
+    color: white;
+    transition: 0.3s;
+    outline: none;
+}
+
+.cyber-input:focus {
+    border-color: var(--neon-red);
+    box-shadow: 0 0 15px rgba(255, 0, 60, 0.2);
+}
+
+.beast-btn {
+    width: 100%;
+    background: var(--neon-red);
+    color: white;
+    padding: 1.25rem;
+    border-radius: 15px;
+    font-weight: 900;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    transition: 0.3s;
+    box-shadow: 0 0 20px rgba(255, 0, 60, 0.4);
+}
+
+.beast-btn:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.2);
+}
+
+#vanta-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+}
+
+.custom-scroll::-webkit-scrollbar { width: 4px; }
+.custom-scroll::-webkit-scrollbar-thumb { background: var(--neon-red); border-radius: 10px; }
